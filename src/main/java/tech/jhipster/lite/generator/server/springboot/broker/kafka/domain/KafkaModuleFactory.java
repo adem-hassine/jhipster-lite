@@ -1,6 +1,7 @@
 package tech.jhipster.lite.generator.server.springboot.broker.kafka.domain;
 
 import static tech.jhipster.lite.module.domain.JHipsterModule.artifactId;
+import static tech.jhipster.lite.module.domain.JHipsterModule.dockerComposeFile;
 import static tech.jhipster.lite.module.domain.JHipsterModule.documentationTitle;
 import static tech.jhipster.lite.module.domain.JHipsterModule.from;
 import static tech.jhipster.lite.module.domain.JHipsterModule.groupId;
@@ -11,11 +12,13 @@ import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcMainDocker;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcMainJava;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcTestJava;
 import static tech.jhipster.lite.module.domain.JHipsterModule.versionSlug;
+import static tech.jhipster.lite.module.domain.javadependency.JavaDependencyScope.RUNTIME;
 
 import java.util.UUID;
 import tech.jhipster.lite.module.domain.JHipsterModule;
 import tech.jhipster.lite.module.domain.docker.DockerImages;
 import tech.jhipster.lite.module.domain.file.JHipsterSource;
+import tech.jhipster.lite.module.domain.javadependency.JavaDependency;
 import tech.jhipster.lite.module.domain.properties.JHipsterModuleProperties;
 
 public class KafkaModuleFactory {
@@ -26,6 +29,7 @@ public class KafkaModuleFactory {
   private static final String SAMPLE_INFRASTRUCTURE_PRIMARY_KAFKA_CONSUMER = "sample/infrastructure/primary/kafka/consumer";
   private static final String STRING_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
   private static final String STRING_SERIALIZER = "org.apache.kafka.common.serialization.StringSerializer";
+  private static final String SPRING_BOOT_GROUP = "org.springframework.boot";
 
   private final DockerImages dockerImages;
 
@@ -50,6 +54,7 @@ public class KafkaModuleFactory {
       .javaDependencies()
         .addDependency(groupId("org.apache.kafka"), artifactId("kafka-clients"), versionSlug("kafka-clients.version"))
         .addDependency(groupId("org.testcontainers"), artifactId("kafka"), versionSlug("testcontainers.version"))
+        .addDependency(addSpringBootDockerComposeIntegrationDependency())
         .and()
       .files()
         .add(SOURCE.template("kafka.yml"), toSrcMainDocker().append("kafka.yml"))
@@ -69,8 +74,12 @@ public class KafkaModuleFactory {
         .set(propertyKey("kafka.producer.'[value.serializer]'"), propertyValue(STRING_SERIALIZER))
         .set(propertyKey("kafka.polling.timeout"), propertyValue(10000))
         .and()
+      .dockerComposeFile()
+        .append(dockerComposeFile("src/main/docker/kafka.yml"))
+        .and()
       .springTestProperties()
         .set(propertyKey("kafka.bootstrap-servers"), propertyValue("localhost:9092"))
+        .set(propertyKey("spring.docker.compose.enabled"), propertyValue(false))
         .and()
       .build();
     //@formatter:on
@@ -111,5 +120,9 @@ public class KafkaModuleFactory {
           .and()
       .build();
     //@formatter:on
+  }
+
+  private JavaDependency addSpringBootDockerComposeIntegrationDependency() {
+    return JavaDependency.builder().groupId(SPRING_BOOT_GROUP).artifactId("spring-boot-docker-compose").scope(RUNTIME).optional().build();
   }
 }

@@ -56,6 +56,7 @@ public class GatewayModuleFactory {
       .springTestBootstrapProperties()
         .set(propertyKey("spring.application.name"), propertyValue(properties.projectBaseName().get()))
         .set(propertyKey("spring.cloud.gateway.discovery.locator.enabled"), propertyValue(false))
+        .set(propertyKey("spring.docker.compose.enabled"), propertyValue(false))
         .and()
       .files()
         .add(SOURCE.template("GatewayResource.java"), destination.append("GatewayResource.java"))

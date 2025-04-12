@@ -90,6 +90,9 @@ class GatewayModuleFactoryTest {
               discovery:
                 locator:
                   enabled: false
+          docker:
+            compose:
+              enabled: false
         """
       )
       .and()

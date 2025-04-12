@@ -3,6 +3,7 @@ package tech.jhipster.lite.generator.server.springboot.mvc.security.oauth2.core.
 import static tech.jhipster.lite.generator.server.springboot.mvc.security.common.domain.AuthenticationModuleFactory.authenticationModuleBuilder;
 import static tech.jhipster.lite.module.domain.JHipsterModule.JHipsterModuleBuilder;
 import static tech.jhipster.lite.module.domain.JHipsterModule.artifactId;
+import static tech.jhipster.lite.module.domain.JHipsterModule.dockerComposeFile;
 import static tech.jhipster.lite.module.domain.JHipsterModule.from;
 import static tech.jhipster.lite.module.domain.JHipsterModule.groupId;
 import static tech.jhipster.lite.module.domain.JHipsterModule.lineBeforeText;
@@ -13,6 +14,7 @@ import static tech.jhipster.lite.module.domain.JHipsterModule.text;
 import static tech.jhipster.lite.module.domain.JHipsterModule.to;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcMainJava;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcTestJava;
+import static tech.jhipster.lite.module.domain.javadependency.JavaDependencyScope.RUNTIME;
 
 import java.util.regex.Pattern;
 import tech.jhipster.lite.module.domain.JHipsterModule;
@@ -21,6 +23,7 @@ import tech.jhipster.lite.module.domain.docker.DockerImages;
 import tech.jhipster.lite.module.domain.file.JHipsterDestination;
 import tech.jhipster.lite.module.domain.file.JHipsterSource;
 import tech.jhipster.lite.module.domain.javabuild.GroupId;
+import tech.jhipster.lite.module.domain.javadependency.JavaDependency;
 import tech.jhipster.lite.module.domain.javaproperties.PropertyValue;
 import tech.jhipster.lite.module.domain.properties.JHipsterModuleProperties;
 import tech.jhipster.lite.module.domain.replacement.TextNeedleBeforeReplacer;
@@ -96,6 +99,8 @@ public class OAuth2ModuleFactory {
         DOCKER_SOURCE.template("jhipster-realm.json"),
         DOCKER_DESTINATION.append("keycloak-realm-config").append(realmName + "-realm.json")
       );
+
+    builder.dockerComposeFile().append(dockerComposeFile("src/main/docker/keycloak.yml"));
   }
 
   private static void appendJavaFiles(JHipsterModuleBuilder builder, JHipsterModuleProperties properties) {
@@ -137,7 +142,8 @@ public class OAuth2ModuleFactory {
     builder
       .javaDependencies()
       .addDependency(SPRING_GROUP, artifactId("spring-boot-starter-oauth2-client"))
-      .addDependency(SPRING_GROUP, artifactId("spring-boot-starter-oauth2-resource-server"));
+      .addDependency(SPRING_GROUP, artifactId("spring-boot-starter-oauth2-resource-server"))
+      .addDependency(addSpringBootDockerComposeIntegrationDependency());
   }
 
   private static void appendSpringProperties(JHipsterModuleBuilder builder, String realmName) {
@@ -155,6 +161,7 @@ public class OAuth2ModuleFactory {
     builder
       .springTestProperties()
       .set(propertyKey("spring.main.allow-bean-definition-overriding"), propertyValue(true))
+      .set(propertyKey("spring.docker.compose.enabled"), propertyValue(false))
       .set(
         propertyKey("spring.security.oauth2.client.provider.oidc.issuer-uri"),
         propertyValue("http://DO_NOT_CALL:9080/realms/" + realmName)
@@ -169,6 +176,10 @@ public class OAuth2ModuleFactory {
       .in(path("src/test/java").append(properties.packagePath()).append("IntegrationTest.java"))
       .add(IMPORT_NEEDLE, testSecurityConfigurationImport(properties))
       .add(text(baseClass), baseClass + ", TestSecurityConfiguration.class");
+  }
+
+  private static JavaDependency addSpringBootDockerComposeIntegrationDependency() {
+    return JavaDependency.builder().groupId(SPRING_GROUP).artifactId("spring-boot-docker-compose").scope(RUNTIME).optional().build();
   }
 
   private static String testSecurityConfigurationImport(JHipsterModuleProperties properties) {

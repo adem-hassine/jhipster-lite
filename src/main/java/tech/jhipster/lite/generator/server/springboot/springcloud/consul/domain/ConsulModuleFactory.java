@@ -2,6 +2,7 @@ package tech.jhipster.lite.generator.server.springboot.springcloud.consul.domain
 
 import static tech.jhipster.lite.module.domain.JHipsterModule.JHipsterModuleBuilder;
 import static tech.jhipster.lite.module.domain.JHipsterModule.artifactId;
+import static tech.jhipster.lite.module.domain.JHipsterModule.dockerComposeFile;
 import static tech.jhipster.lite.module.domain.JHipsterModule.from;
 import static tech.jhipster.lite.module.domain.JHipsterModule.groupId;
 import static tech.jhipster.lite.module.domain.JHipsterModule.javaDependency;
@@ -9,6 +10,7 @@ import static tech.jhipster.lite.module.domain.JHipsterModule.moduleBuilder;
 import static tech.jhipster.lite.module.domain.JHipsterModule.propertyKey;
 import static tech.jhipster.lite.module.domain.JHipsterModule.propertyValue;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcMainDocker;
+import static tech.jhipster.lite.module.domain.javadependency.JavaDependencyScope.RUNTIME;
 
 import tech.jhipster.lite.module.domain.JHipsterModule;
 import tech.jhipster.lite.module.domain.LogLevel;
@@ -34,6 +36,7 @@ public class ConsulModuleFactory {
   private static final PropertyValue TRUE_VALUE = propertyValue(true);
   private static final String DOCKER_IMAGE_CONSUL = "consul";
   private static final String DOCKER_IMAGE_CONFIG_LOADER = "jhipster/consul-config-loader";
+  private static final String SPRING_BOOT_GROUP = "org.springframework.boot";
 
   private final DockerImages dockerImages;
 
@@ -65,6 +68,7 @@ public class ConsulModuleFactory {
         .addDependency(SPRING_CLOUD_GROUP_ID, artifactId("spring-cloud-starter-bootstrap"))
         .addDependency(SPRING_CLOUD_GROUP_ID, artifactId("spring-cloud-starter-consul-discovery"))
         .addDependency(SPRING_CLOUD_GROUP_ID, artifactId("spring-cloud-starter-consul-config"))
+        .addDependency(addSpringBootDockerComposeIntegrationDependency())
         .and()
       .startupCommands()
         .dockerCompose("src/main/docker/consul.yml")
@@ -91,6 +95,10 @@ public class ConsulModuleFactory {
       .springTestBootstrapProperties()
         .set(propertyKey("spring.cloud.consul.enabled"), FALSE_VALUE)
         .set(propertyKey("spring.cloud.compatibility-verifier.enabled"), FALSE_VALUE)
+        .set(propertyKey("spring.docker.compose.enabled"), propertyValue(false))
+        .and()
+      .dockerComposeFile()
+        .append(dockerComposeFile("src/main/docker/consul.yml"))
         .and()
       .springMainLogger("org.apache", LogLevel.ERROR)
       .springTestLogger("org.apache", LogLevel.ERROR);
@@ -107,5 +115,9 @@ public class ConsulModuleFactory {
       .type(JavaDependencyType.POM)
       .scope(JavaDependencyScope.IMPORT)
       .build();
+  }
+
+  private JavaDependency addSpringBootDockerComposeIntegrationDependency() {
+    return JavaDependency.builder().groupId(SPRING_BOOT_GROUP).artifactId("spring-boot-docker-compose").scope(RUNTIME).optional().build();
   }
 }

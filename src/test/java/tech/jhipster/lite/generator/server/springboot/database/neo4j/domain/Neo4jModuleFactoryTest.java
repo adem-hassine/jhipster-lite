@@ -59,6 +59,16 @@ class Neo4jModuleFactoryTest {
       .containing(
         """
             <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+            </dependency>
+        """
+      )
+      .containing(
+        """
+            <dependency>
               <groupId>org.testcontainers</groupId>
               <artifactId>neo4j</artifactId>
               <version>${testcontainers.version}</version>
@@ -69,6 +79,9 @@ class Neo4jModuleFactoryTest {
       .and()
       .hasFile("src/main/docker/neo4j.yml")
       .containing("neo4j:4.4.11-community")
+      .and()
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/neo4j.yml")
       .and()
       .hasFiles("src/test/java/tech/jhipster/jhlitest/TestNeo4jManager.java")
       .hasFile("src/test/resources/META-INF/spring.factories")
@@ -89,6 +102,9 @@ class Neo4jModuleFactoryTest {
       .containing(
         """
         spring:
+          docker:
+            compose:
+              enabled: false
           neo4j:
             uri: ${TEST_NEO4J_URI}
         """

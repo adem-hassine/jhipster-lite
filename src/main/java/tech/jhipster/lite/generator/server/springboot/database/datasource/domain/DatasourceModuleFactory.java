@@ -1,6 +1,7 @@
 package tech.jhipster.lite.generator.server.springboot.database.datasource.domain;
 
 import static tech.jhipster.lite.module.domain.JHipsterModule.artifactId;
+import static tech.jhipster.lite.module.domain.JHipsterModule.dockerComposeFile;
 import static tech.jhipster.lite.module.domain.JHipsterModule.documentationTitle;
 import static tech.jhipster.lite.module.domain.JHipsterModule.from;
 import static tech.jhipster.lite.module.domain.JHipsterModule.groupId;
@@ -33,6 +34,7 @@ public class DatasourceModuleFactory {
   private static final String MYSQL = "mysql";
   private static final String MARIADB = "mariadb";
 
+  private static final String SPRING_BOOT_GROUP = "org.springframework.boot";
   private static final String SPRING_DATASOURCE_URL = "spring.datasource.url";
   private static final String SPRING_DATASOURCE_USERNAME = "spring.datasource.username";
   private static final String SPRING_DATASOURCE_PASSWORD = "spring.datasource.password";
@@ -62,6 +64,8 @@ public class DatasourceModuleFactory {
     //@formatter:off
     return moduleBuilder(properties)
       .apply(dockerContainer(dockerImages, datasourceProperties))
+      .apply(declareDockerComposeService(datasourceProperties))
+      .apply(addSpringBootDockerComposeIntegrationDependency())
       .apply(connectionPool(datasourceProperties))
       .apply(testcontainers(dockerImages, properties, datasourceProperties))
       .springMainProperties()
@@ -97,6 +101,8 @@ public class DatasourceModuleFactory {
     //@formatter:off
     return moduleBuilder(properties)
       .apply(dockerContainer(dockerImages, datasourceProperties))
+      .apply(declareDockerComposeService(datasourceProperties))
+      .apply(addSpringBootDockerComposeIntegrationDependency())
       .apply(connectionPool( datasourceProperties))
       .apply(testcontainers(dockerImages,  properties, datasourceProperties))
       .springMainProperties()
@@ -121,6 +127,8 @@ public class DatasourceModuleFactory {
     //@formatter:off
     return moduleBuilder(properties)
       .apply(dockerContainer(dockerImages, datasourceProperties))
+      .apply(declareDockerComposeService(datasourceProperties))
+      .apply(addSpringBootDockerComposeIntegrationDependency())
       .apply(connectionPool( datasourceProperties))
       .apply(testcontainers(dockerImages,  properties, datasourceProperties))
       .springMainProperties()
@@ -145,6 +153,8 @@ public class DatasourceModuleFactory {
     //@formatter:off
     return moduleBuilder(properties)
       .apply(dockerContainer(dockerImages, datasourceProperties))
+      .apply(declareDockerComposeService(datasourceProperties))
+      .apply(addSpringBootDockerComposeIntegrationDependency())
       .apply(connectionPool(datasourceProperties))
       .apply(testcontainers(dockerImages,  properties, datasourceProperties))
       .files()
@@ -187,6 +197,20 @@ public class DatasourceModuleFactory {
     //@formatter:on
   }
 
+  public static Consumer<JHipsterModule.JHipsterModuleBuilder> addSpringBootDockerComposeIntegrationDependency() {
+    return moduleBuilder ->
+      moduleBuilder
+        .javaDependencies()
+        .addDependency(
+          javaDependency().groupId(SPRING_BOOT_GROUP).artifactId("spring-boot-docker-compose").scope(RUNTIME).optional().build()
+        );
+  }
+
+  public static Consumer<JHipsterModule.JHipsterModuleBuilder> declareDockerComposeService(DatasourceProperties datasourceProperties) {
+    return moduleBuilder ->
+      moduleBuilder.dockerComposeFile().append(dockerComposeFile("src/main/docker/%s.yml".formatted(datasourceProperties.id())));
+  }
+
   public static Consumer<JHipsterModule.JHipsterModuleBuilder> dockerContainer(
     DockerImages dockerImages,
     DatasourceProperties datasourceProperties
@@ -226,6 +250,7 @@ public class DatasourceModuleFactory {
           .set(propertyKey(SPRING_DATASOURCE_USERNAME), propertyValue(moduleProperties.projectBaseName().name()))
           .set(propertyKey(SPRING_DATASOURCE_PASSWORD), propertyValue(""))
           .set(propertyKey(SPRING_DATASOURCE_DRIVER_CLASS_NAME), propertyValue("org.testcontainers.jdbc.ContainerDatabaseDriver"))
+          .set(propertyKey("spring.docker.compose.enabled"), propertyValue(false))
           .and()
         .springTestLogger("com.github.dockerjava", LogLevel.WARN)
         .springTestLogger("org.testcontainers", LogLevel.WARN);

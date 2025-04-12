@@ -11,3 +11,6 @@ services:
       dockerfile: cassandra/Cassandra-Migration.Dockerfile
     volumes:
       - ../resources/config/cql:/cql:ro
+    depends_on:
+      cassandra:
+        condition: service_healthy

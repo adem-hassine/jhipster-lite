@@ -53,7 +53,7 @@ public class RedisModuleFactory {
         .and()
       .javaDependencies()
         .addDependency(groupId(SPRING_BOOT_GROUP), artifactId("spring-boot-starter-data-redis"))
-        .addDependency(springBootDockerComposeIntegration())
+        .addDependency(addSpringBootDockerComposeIntegrationDependency())
         .addDependency(reflectionsDependency())
         .addDependency(testContainerDependency())
         .and()
@@ -75,6 +75,7 @@ public class RedisModuleFactory {
         .and()
       .springTestProperties()
         .set(propertyKey("spring.data.redis.url"), propertyValue("${TEST_REDIS_URL}"))
+        .set(propertyKey("spring.docker.compose.enabled"), propertyValue(false))
         .and()
       .springTestFactories()
         .append(propertyKey("org.springframework.context.ApplicationListener"), propertyValue(packageName + "TestRedisManager"))
@@ -101,7 +102,7 @@ public class RedisModuleFactory {
       .build();
   }
 
-  private JavaDependency springBootDockerComposeIntegration() {
+  private JavaDependency addSpringBootDockerComposeIntegrationDependency() {
     return JavaDependency.builder().groupId(SPRING_BOOT_GROUP).artifactId("spring-boot-docker-compose").scope(RUNTIME).optional().build();
   }
 

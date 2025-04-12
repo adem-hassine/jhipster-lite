@@ -69,6 +69,16 @@ class EurekaModuleFactoryTest {
             </dependency>
         """
       )
+      .containing(
+        """
+            <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+            </dependency>
+        """
+      )
       .and()
       .hasFile("src/main/resources/config/bootstrap.yml")
       .containing(
@@ -117,6 +127,9 @@ class EurekaModuleFactoryTest {
       .and()
       .hasFile("src/main/docker/jhipster-registry.yml")
       .containing("jhipster/jhipster-registry:1.1.1")
+      .and()
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/jhipster-registry.yml")
       .and()
       .hasFile("src/main/docker/central-server-config/localhost-config/application.properties");
   }

@@ -2,6 +2,7 @@ package tech.jhipster.lite.generator.server.springboot.database.cassandra.domain
 
 import static tech.jhipster.lite.module.domain.JHipsterModule.artifactId;
 import static tech.jhipster.lite.module.domain.JHipsterModule.comment;
+import static tech.jhipster.lite.module.domain.JHipsterModule.dockerComposeFile;
 import static tech.jhipster.lite.module.domain.JHipsterModule.documentationTitle;
 import static tech.jhipster.lite.module.domain.JHipsterModule.from;
 import static tech.jhipster.lite.module.domain.JHipsterModule.groupId;
@@ -12,11 +13,13 @@ import static tech.jhipster.lite.module.domain.JHipsterModule.propertyValue;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcMainDocker;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcMainJava;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcTestJava;
+import static tech.jhipster.lite.module.domain.javadependency.JavaDependencyScope.RUNTIME;
 
 import tech.jhipster.lite.module.domain.JHipsterModule;
 import tech.jhipster.lite.module.domain.LogLevel;
 import tech.jhipster.lite.module.domain.docker.DockerImages;
 import tech.jhipster.lite.module.domain.file.JHipsterSource;
+import tech.jhipster.lite.module.domain.javabuild.GroupId;
 import tech.jhipster.lite.module.domain.javadependency.JavaDependency;
 import tech.jhipster.lite.module.domain.javadependency.JavaDependencyScope;
 import tech.jhipster.lite.module.domain.javaproperties.PropertyKey;
@@ -29,6 +32,7 @@ public class CassandraModuleFactory {
   private static final String CASSANDRA_SECONDARY = "wire/cassandra/infrastructure/secondary";
   private static final String DC = "datacenter1";
   private static final PropertyKey LOCAL_DATACENTER_PROPERTY = propertyKey("spring.cassandra.local-datacenter");
+  private static final GroupId SPRING_BOOT_GROUP = groupId("org.springframework.boot");
   private final DockerImages dockerImages;
 
   public CassandraModuleFactory(DockerImages dockerImages) {
@@ -44,7 +48,8 @@ public class CassandraModuleFactory {
     //@formatter:off
     return moduleBuilder(properties)
       .javaDependencies()
-        .addDependency(groupId("org.springframework.boot"), artifactId("spring-boot-starter-data-cassandra"))
+        .addDependency(SPRING_BOOT_GROUP, artifactId("spring-boot-starter-data-cassandra"))
+        .addDependency(addSpringBootDockerComposeIntegrationDependency())
         .addDependency(testContainerDependency())
         .and()
       .documentation(documentationTitle("Cassandra"), SOURCE.file("cassandra.md"))
@@ -80,9 +85,13 @@ public class CassandraModuleFactory {
         .set(propertyKey("spring.cassandra.contact-points"), propertyValue("${TEST_CASSANDRA_CONTACT_POINT}"))
         .set(LOCAL_DATACENTER_PROPERTY, propertyValue("${TEST_CASSANDRA_DC}"))
         .set(propertyKey("spring.cassandra.keyspace-name"), propertyValue("${TEST_CASSANDRA_KEYSPACE}"))
+        .set(propertyKey("spring.docker.compose.enabled"), propertyValue(false))
         .and()
       .springTestFactories()
         .append(propertyKey("org.springframework.context.ApplicationListener"), propertyValue(packageName + "TestCassandraManager"))
+        .and()
+      .dockerComposeFile()
+        .append(dockerComposeFile("src/main/docker/cassandra.yml"))
         .and()
       .springMainLogger("com.datastax", LogLevel.WARN)
       .springTestLogger("com.datastax", LogLevel.WARN)
@@ -98,5 +107,9 @@ public class CassandraModuleFactory {
       .versionSlug("testcontainers")
       .scope(JavaDependencyScope.TEST)
       .build();
+  }
+
+  private JavaDependency addSpringBootDockerComposeIntegrationDependency() {
+    return JavaDependency.builder().groupId(SPRING_BOOT_GROUP).artifactId("spring-boot-docker-compose").scope(RUNTIME).optional().build();
   }
 }

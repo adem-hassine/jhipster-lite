@@ -3,17 +3,20 @@ package tech.jhipster.lite.generator.server.springboot.springcloud.eureka.domain
 import static tech.jhipster.lite.generator.server.springboot.springcloud.common.domain.SpringCloudModuleDependencies.SPRING_CLOUD_GROUP;
 import static tech.jhipster.lite.generator.server.springboot.springcloud.common.domain.SpringCloudModuleDependencies.springCloudDependenciesManagement;
 import static tech.jhipster.lite.module.domain.JHipsterModule.artifactId;
+import static tech.jhipster.lite.module.domain.JHipsterModule.dockerComposeFile;
 import static tech.jhipster.lite.module.domain.JHipsterModule.from;
 import static tech.jhipster.lite.module.domain.JHipsterModule.moduleBuilder;
 import static tech.jhipster.lite.module.domain.JHipsterModule.propertyKey;
 import static tech.jhipster.lite.module.domain.JHipsterModule.propertyValue;
 import static tech.jhipster.lite.module.domain.JHipsterModule.to;
 import static tech.jhipster.lite.module.domain.JHipsterModule.versionSlug;
+import static tech.jhipster.lite.module.domain.javadependency.JavaDependencyScope.RUNTIME;
 
 import java.util.Locale;
 import tech.jhipster.lite.module.domain.JHipsterModule;
 import tech.jhipster.lite.module.domain.docker.DockerImages;
 import tech.jhipster.lite.module.domain.file.JHipsterSource;
+import tech.jhipster.lite.module.domain.javadependency.JavaDependency;
 import tech.jhipster.lite.module.domain.javaproperties.PropertyValue;
 import tech.jhipster.lite.module.domain.properties.JHipsterModuleProperties;
 import tech.jhipster.lite.shared.base64.domain.Base64Utils;
@@ -22,6 +25,7 @@ import tech.jhipster.lite.shared.error.domain.Assert;
 public class EurekaModuleFactory {
 
   private static final String JWT_BASE_64_SECRET = "jwtBase64Secret";
+  private static final String SPRING_BOOT_GROUP = "org.springframework.boot";
   private static final PropertyValue TRUE_VALUE = propertyValue(true);
   private static final PropertyValue FALSE_VALUE = propertyValue(false);
   private static final JHipsterSource SPRING_CLOUD_SOURCE = from("server/springboot/springcloud/configclient");
@@ -54,6 +58,7 @@ public class EurekaModuleFactory {
           artifactId("spring-cloud-starter-netflix-eureka-client"),
           versionSlug("spring-cloud-netflix-eureka-client")
         )
+      .addDependency(addSpringBootDockerComposeIntegrationDependency())
         .and()
       .files()
         .add(SPRING_CLOUD_SOURCE.template("jhipster-registry.yml"), to("src/main/docker/jhipster-registry.yml"))
@@ -84,11 +89,18 @@ public class EurekaModuleFactory {
         .set(propertyKey("eureka.client.enabled"), FALSE_VALUE)
         .set(propertyKey("spring.cloud.compatibility-verifier.enabled"), FALSE_VALUE)
         .and()
+      .dockerComposeFile()
+        .append(dockerComposeFile("src/main/docker/jhipster-registry.yml"))
+        .and()
       .build();
     //@formatter:on
   }
 
   private String instanceId(String lowerCaseBaseName) {
     return lowerCaseBaseName + ":${spring.application.instance-id:${random.value}}";
+  }
+
+  private JavaDependency addSpringBootDockerComposeIntegrationDependency() {
+    return JavaDependency.builder().groupId(SPRING_BOOT_GROUP).artifactId("spring-boot-docker-compose").scope(RUNTIME).optional().build();
   }
 }

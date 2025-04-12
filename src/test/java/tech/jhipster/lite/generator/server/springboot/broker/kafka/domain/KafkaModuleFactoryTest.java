@@ -50,10 +50,23 @@ class KafkaModuleFactoryTest {
       .hasFile("pom.xml")
       .containing("<artifactId>kafka-clients</artifactId>")
       .containing("<artifactId>kafka</artifactId>")
+      .containing(
+        """
+            <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+            </dependency>
+        """
+      )
       .and()
       .hasFile("src/main/docker/kafka.yml")
       .containing("image: apache/kafka-native")
       .containing("CLUSTER_ID: 'my-cluster'")
+      .and()
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/kafka.yml")
       .and()
       .hasFile("src/main/resources/config/application.yml")
       .containing(
@@ -78,6 +91,14 @@ class KafkaModuleFactoryTest {
         """
         kafka:
           bootstrap-servers: localhost:9092
+        """
+      )
+      .containing(
+        """
+        spring:
+          docker:
+            compose:
+              enabled: false
         """
       )
       .and()

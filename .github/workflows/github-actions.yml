@@ -497,18 +497,15 @@ jobs:
           fi
       - name: 'Test: copy shell scripts'
         if: steps.tests-requirement-check.outputs.execute_tests == 'true'
-        run: cp ./current-branch/tests-ci/start.sh /tmp/jhlite/${{ matrix.app }}/
-      - name: 'Test: start docker-compose services'
-        if: steps.tests-requirement-check.outputs.execute_tests == 'true'
-        working-directory: ./current-branch/tests-ci/
         run: |
-          ./start_docker_compose.sh /tmp/jhlite/${{ matrix.app }}/
+          cp ./current-branch/tests-ci/start_archetype.sh /tmp/jhlite/${{ matrix.app }}/
+          chmod +x /tmp/jhlite/${{ matrix.app }}/start_archetype.sh
       - name: 'Test: start the application'
         if: steps.tests-requirement-check.outputs.execute_tests == 'true'
         working-directory: /tmp/jhlite/${{ matrix.app }}/
         run: |
           if [ -f 'mvnw' ] || [ -f 'gradlew' ]; then
-            ./start.sh
+            ./start_archetype.sh
           fi
 
   #--------------------------------------------------

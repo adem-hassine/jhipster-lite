@@ -1,6 +1,7 @@
 package tech.jhipster.lite.generator.server.springboot.database.neo4j.domain;
 
 import static tech.jhipster.lite.module.domain.JHipsterModule.artifactId;
+import static tech.jhipster.lite.module.domain.JHipsterModule.dockerComposeFile;
 import static tech.jhipster.lite.module.domain.JHipsterModule.documentationTitle;
 import static tech.jhipster.lite.module.domain.JHipsterModule.from;
 import static tech.jhipster.lite.module.domain.JHipsterModule.groupId;
@@ -11,11 +12,13 @@ import static tech.jhipster.lite.module.domain.JHipsterModule.propertyValue;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcMainDocker;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcMainJava;
 import static tech.jhipster.lite.module.domain.JHipsterModule.toSrcTestJava;
+import static tech.jhipster.lite.module.domain.javadependency.JavaDependencyScope.RUNTIME;
 
 import tech.jhipster.lite.module.domain.JHipsterModule;
 import tech.jhipster.lite.module.domain.LogLevel;
 import tech.jhipster.lite.module.domain.docker.DockerImages;
 import tech.jhipster.lite.module.domain.file.JHipsterSource;
+import tech.jhipster.lite.module.domain.javabuild.GroupId;
 import tech.jhipster.lite.module.domain.javadependency.JavaDependency;
 import tech.jhipster.lite.module.domain.javadependency.JavaDependencyScope;
 import tech.jhipster.lite.module.domain.properties.JHipsterModuleProperties;
@@ -26,6 +29,8 @@ public class Neo4jModuleFactory {
   private static final JHipsterSource SOURCE = from("server/springboot/database/neo4j");
 
   private static final String NEO4J_SECONDARY = "technical/infrastructure/secondary/neo4j";
+
+  private static final GroupId SPRING_BOOT_GROUP = groupId("org.springframework.boot");
 
   private final DockerImages dockerImages;
 
@@ -49,7 +54,8 @@ public class Neo4jModuleFactory {
       .put("neo4jDockerImage", dockerImages.get("neo4j").fullName())
         .and()
       .javaDependencies()
-        .addDependency(groupId("org.springframework.boot"), artifactId("spring-boot-starter-data-neo4j"))
+        .addDependency(SPRING_BOOT_GROUP, artifactId("spring-boot-starter-data-neo4j"))
+        .addDependency(addSpringBootDockerComposeIntegrationDependency())
         .addDependency(testContainerDependency())
         .and()
       .files()
@@ -64,9 +70,13 @@ public class Neo4jModuleFactory {
         .and()
       .springTestProperties()
         .set(propertyKey("spring.neo4j.uri"), propertyValue("${TEST_NEO4J_URI}"))
+        .set(propertyKey("spring.docker.compose.enabled"), propertyValue(false))
         .and()
       .springTestFactories()
         .append(propertyKey("org.springframework.context.ApplicationListener"), propertyValue(packageName + "TestNeo4jManager"))
+        .and()
+      .dockerComposeFile()
+        .append(dockerComposeFile("src/main/docker/neo4j.yml"))
         .and()
       .springMainLogger("org.neo4j.driver", LogLevel.WARN)
       .springTestLogger("org.neo4j.driver", LogLevel.WARN)
@@ -83,5 +93,9 @@ public class Neo4jModuleFactory {
       .versionSlug("testcontainers")
       .scope(JavaDependencyScope.TEST)
       .build();
+  }
+
+  private JavaDependency addSpringBootDockerComposeIntegrationDependency() {
+    return JavaDependency.builder().groupId(SPRING_BOOT_GROUP).artifactId("spring-boot-docker-compose").scope(RUNTIME).optional().build();
   }
 }

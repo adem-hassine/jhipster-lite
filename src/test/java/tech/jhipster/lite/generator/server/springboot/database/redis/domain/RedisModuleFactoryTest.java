@@ -127,6 +127,19 @@ class RedisModuleFactoryTest {
       .containing("<logger name=\"org.reflections\" level=\"WARN\" />")
       .containing("<logger name=\"org.springframework.data.redis\" level=\"WARN\" />")
       .and()
+      .hasFile("src/test/resources/config/application-test.yml")
+      .containing(
+        """
+        spring:
+          data:
+            redis:
+              url: ${TEST_REDIS_URL}
+          docker:
+            compose:
+              enabled: false
+        """
+      )
+      .and()
       .hasFile("src/test/resources/logback.xml")
       .containing("<logger name=\"org.reflections\" level=\"WARN\" />")
       .containing("<logger name=\"redis.clients.jedis\" level=\"WARN\" />")

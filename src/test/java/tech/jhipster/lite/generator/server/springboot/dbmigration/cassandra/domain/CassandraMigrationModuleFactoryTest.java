@@ -48,8 +48,21 @@ class CassandraMigrationModuleFactoryTest {
             </dependency>
         """
       )
+      .containing(
+        """
+            <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+            </dependency>
+        """
+      )
       .and()
       .hasFiles("src/main/docker/cassandra-migration.yml")
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/cassandra-migration.yml")
+      .and()
       .hasFiles("src/main/resources/config/cql/create-migration-keyspace.cql")
       .hasFiles("src/main/resources/config/cql/changelog/README.md")
       .hasFiles("documentation/cassandra-migration.md")

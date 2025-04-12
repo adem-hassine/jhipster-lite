@@ -42,6 +42,9 @@ class ConsulModuleFactoryTest {
       .containing("consul:1.12.2")
       .containing("jhipster/consul-config-loader:v0.4.1")
       .and()
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/consul.yml")
+      .and()
       .hasFile("src/main/docker/central-server-config/application.yml")
       .and()
       .hasFile("pom.xml")
@@ -77,6 +80,16 @@ class ConsulModuleFactoryTest {
             <dependency>
               <groupId>org.springframework.cloud</groupId>
               <artifactId>spring-cloud-starter-consul-config</artifactId>
+            </dependency>
+        """
+      )
+      .containing(
+        """
+            <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
             </dependency>
         """
       )
@@ -120,6 +133,9 @@ class ConsulModuleFactoryTest {
             compatibility-verifier:
               enabled: false
             consul:
+              enabled: false
+          docker:
+            compose:
               enabled: false
         """
       )

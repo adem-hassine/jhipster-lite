@@ -58,6 +58,19 @@ class DatasourceModuleFactoryTest {
       .containing("<groupId>com.zaxxer</groupId>")
       .containing("<artifactId>HikariCP</artifactId>")
       .containing("<groupId>org.testcontainers</groupId>")
+      .containing(
+        """
+            <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+            </dependency>
+        """
+      )
+      .and()
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/postgresql.yml")
       .and()
       .hasFile("src/main/resources/config/application.yml")
       .containing(
@@ -85,6 +98,9 @@ class DatasourceModuleFactoryTest {
             password: ''
             url: jdbc:tc:postgresql:0.0.0:///myapp?TC_TMPFS=/testtmpfs:rw
             username: myapp
+          docker:
+            compose:
+              enabled: false
         """
       );
   }
@@ -119,6 +135,19 @@ class DatasourceModuleFactoryTest {
       .containing("<artifactId>HikariCP</artifactId>")
       .containing("<groupId>org.testcontainers</groupId>")
       .containing("<artifactId>mariadb</artifactId>")
+      .containing(
+        """
+            <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+            </dependency>
+        """
+      )
+      .and()
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/mariadb.yml")
       .and()
       .hasFile("src/main/resources/config/application.yml")
       .containing(
@@ -147,6 +176,9 @@ class DatasourceModuleFactoryTest {
             password: ''
             url: jdbc:tc:mariadb:0.0.0:///myapp
             username: myapp
+          docker:
+            compose:
+              enabled: false
         """
       );
   }
@@ -181,6 +213,19 @@ class DatasourceModuleFactoryTest {
       .containing("<artifactId>HikariCP</artifactId>")
       .containing("<groupId>org.testcontainers</groupId>")
       .containing("<artifactId>mysql</artifactId>")
+      .containing(
+        """
+            <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+            </dependency>
+        """
+      )
+      .and()
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/mysql.yml")
       .and()
       .hasFile("src/main/resources/config/application.yml")
       .containing(
@@ -211,6 +256,9 @@ class DatasourceModuleFactoryTest {
             password: ''
             url: jdbc:tc:mysql:0.0.0:///myapp
             username: myapp
+          docker:
+            compose:
+              enabled: false
         """
       );
   }
@@ -250,6 +298,19 @@ class DatasourceModuleFactoryTest {
       .containing("<artifactId>HikariCP</artifactId>")
       .containing("<groupId>org.testcontainers</groupId>")
       .containing("<artifactId>mssqlserver</artifactId>")
+      .containing(
+        """
+            <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+            </dependency>
+        """
+      )
+      .and()
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/mssql.yml")
       .and()
       .hasFile("src/main/resources/config/application.yml")
       .containing(
@@ -280,6 +341,9 @@ class DatasourceModuleFactoryTest {
             password: yourStrong(!)Password
             url: jdbc:tc:sqlserver:///;database=myapp;trustServerCertificate=true?TC_TMPFS=/testtmpfs:rw
             username: SA
+          docker:
+            compose:
+              enabled: false
         """
       );
   }

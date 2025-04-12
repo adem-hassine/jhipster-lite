@@ -59,6 +59,16 @@ class MongoDbModuleFactoryTest {
       .containing(
         """
             <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-docker-compose</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+            </dependency>
+        """
+      )
+      .containing(
+        """
+            <dependency>
               <groupId>org.testcontainers</groupId>
               <artifactId>mongodb</artifactId>
               <version>${testcontainers.version}</version>
@@ -78,6 +88,9 @@ class MongoDbModuleFactoryTest {
       .and()
       .hasFile("src/main/docker/mongodb.yml")
       .containing("mongo:1.1.1")
+      .and()
+      .hasFile("docker-compose.yml")
+      .containing("src/main/docker/mongodb.yml")
       .and()
       .hasPrefixedFiles(
         "src/main/java/tech/jhipster/jhlitest/wire/mongodb/infrastructure/secondary",
@@ -107,6 +120,9 @@ class MongoDbModuleFactoryTest {
           data:
             mongodb:
               uri: ${TEST_MONGODB_URI}
+          docker:
+            compose:
+              enabled: false
         """
       )
       .and()
